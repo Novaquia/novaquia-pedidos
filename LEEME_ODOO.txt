@@ -1,0 +1,16 @@
+NOVAQUIA PEDIDOS - EXPORTACION ODOO
+
+Esta version añade EXPORTAR PARA ODOO en Pedidos enviados.
+Genera un archivo JSON por pedido con:
+- order_id
+- commercial
+- customer
+- pricelist
+- notes
+- date
+- total_units
+- lines: reference, model, color, quantity
+
+El ordenador de la oficina usará estos JSON para crear presupuestos en Odoo 14.
+El puente deberá validar cliente, tarifa y referencias antes de crear el presupuesto.
+Formato: NOVAQUIA_ODOO_ORDER_V1
