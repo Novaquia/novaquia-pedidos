@@ -1,0 +1,79 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NOVAQUIA · Administración V14 · Filtros inmóviles</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6f7;color:#23353c;font:11px Arial,sans-serif}header{background:white;border-bottom:1px solid #dae3e5;display:flex;align-items:center;gap:15px;padding:8px 2%}header img{width:130px;max-height:48px;object-fit:contain}h1{font-size:17px;margin:0}header small{font-size:10px;color:#697a80}main{max-width:1900px;margin:auto;padding:10px 1.5%}.info{background:#fff9e9;border:1px solid #eee2b9;border-radius:6px;padding:7px;margin-bottom:9px;font-size:10px}.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px;position:fixed;top:0;left:0;right:0;z-index:1000;background:#f3f6f7;padding:9px 3px;box-shadow:0 3px 9px rgba(28,60,65,.15);border-bottom:1px solid #d7e2e4}.filters input,.filters select{font:11px Arial;border:1px solid #d4dfe2;background:white;border-radius:5px;padding:7px;min-width:130px;flex:1}.count{color:#61757b;font-size:11px;margin:6px 0 9px}.model{background:#fff;border:1px solid #d7e2e4;border-left:4px solid #149ca7;border-radius:7px;margin-bottom:9px;overflow:hidden}.model:nth-child(even){border-left-color:#526d77}.modelhead{background:#edf6f7;padding:7px 9px;display:flex;justify-content:space-between;gap:10px;align-items:center}.model:nth-child(even) .modelhead{background:#f1f4f5}.modelhead strong{font-size:11px}.modelhead span{color:#6d7d82;font-size:10px}.variants{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:7px;padding:8px}.variant{border:1px solid #e3e9eb;border-radius:6px;padding:6px;min-width:0;background:#fff}.photo{height:67px;display:flex;align-items:center;justify-content:center}.photo img{width:100%;height:65px;object-fit:contain}.ref{font-size:10px;font-weight:700;text-align:center;margin:4px 0}.metrics{display:flex;justify-content:space-between;gap:4px;font-size:9px;flex-wrap:wrap}.metrics b{font-size:11px;color:#147c86}.muted{color:#77878c}.charttitle{font-size:9px;color:#62777e;margin-top:5px}.chart{display:flex;align-items:flex-end;gap:2px;overflow-x:auto;height:59px;border-bottom:1px solid #d8e0e2;padding-top:3px}.cell{flex:1;min-width:9px;max-width:19px;height:100%;display:flex;align-items:center;justify-content:flex-end;flex-direction:column}.bar{background:#1e9aa5;width:100%;max-width:12px;min-height:0;border-radius:2px 2px 0 0}.val{font-size:8px;color:#2e535b;line-height:10px}.mon{font-size:7px;color:#829196;line-height:10px;white-space:nowrap}.none{font-size:9px;color:#8a969b;margin-top:12px}.first{font-size:9px;color:#76898f;margin-top:3px}.pager{display:flex;gap:7px;align-items:center;justify-content:center;margin:15px}.pager button{padding:7px 13px;border:1px solid #bdd6da;border-radius:5px;background:white;cursor:pointer}.pager button:disabled{opacity:.4} @media(max-width:650px){.variants{grid-template-columns:repeat(2,minmax(0,1fr))}.modelhead{align-items:start;flex-direction:column}}
+body{padding-top:62px} .filters{margin-bottom:0;padding:9px max(12px, 1.5%)} @media(max-width:850px){body{padding-top:115px}}
+
+/* V14: the entire header/filter panel is OUTSIDE the only scrollable region. */
+html,body{height:100%;overflow:hidden}
+body{padding-top:0!important;display:flex;flex-direction:column;min-height:0}
+.top-panel{position:relative;z-index:20;flex:0 0 auto;background:#fff;box-shadow:0 2px 8px rgba(28,60,65,.12)}
+.top-panel header{position:static}
+.top-panel .filters{position:static!important;top:auto!important;left:auto!important;right:auto!important;display:flex;margin:0;padding:9px max(12px,1.5%);box-shadow:none;background:#f3f6f7}
+main#catalogScroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;max-width:none;width:100%;overscroll-behavior:contain}
+@media(max-width:850px){body{padding-top:0!important}}
+.login{margin:8vh auto;padding:24px;max-width:380px;width:92%;background:white;border:1px solid #d7e2e4;border-radius:10px;display:flex;flex-direction:column;gap:12px}.login[hidden],main[hidden]{display:none!important}.login h2{font-size:17px;margin:0 0 8px}.login input,.login button{font-size:14px;padding:12px;border:1px solid #cbd9dd;border-radius:6px}.login button{background:#148e99;color:white;cursor:pointer}.login p{color:#b23b39;line-height:1.5;margin:0}.login small{color:#66777a}img[data-private-photo]{visibility:hidden} </style></head><body><div class="top-panel"><header><img src="logo_novaquia.png" alt="Novaquia"><div><h1>Administración · Histórico por variante</h1><small>Modelos agrupados · Compras y entregas individuales · Gráficos siempre visibles</small></div></header><div class="filters" style="display:none"><input id="q" placeholder="Buscar modelo o referencia"><select id="cat"><option value="">Todas las categorías</option></select><select id="sup"><option value="">Todos los proveedores</option></select><select id="year"><option value="">Todos los años de compra</option></select><select id="month"><option value="">Todos los meses de compra</option></select><select id="pub"><option value="">Todos los estados</option><option value="1">Publicados</option><option value="0">No publicados</option></select></div></div><section id="loginPanel" class="login"><h2>Acceso privado · Administración</h2><input id="email" type="email" placeholder="Correo electrónico" autocomplete="username"><input id="password" type="password" placeholder="Contraseña" autocomplete="current-password"><button id="loginButton">Entrar</button><p id="statusText"></p><small>Solo usuarios administradores autorizados.</small></section><main id="catalogScroll" hidden><div class="info">Consulta privada sincronizada con Odoo 14. <b>Compras</b> = recepciones registradas; <b>ventas</b> = entregas a clientes, no facturación. Si una compra aparece como «—», no consta recepción en el histórico extraído. Sin devoluciones.</div><div id="count" class="count"></div><div id="list"></div><div class="pager"><button id="prev">Anterior</button><span id="page"></span><button id="next">Siguiente</button></div></main><script>
+const SUPABASE_URL='https://vtpdqcamorkycualdoas.supabase.co';
+const SUPABASE_KEY='sb_publishable_AKdnSI85e4a50w_A3P7raw_1jLQO4-X';
+const BUCKET='novaquia-administracion-fotos';
+let DATA=[];let accessToken='';let photoCache=new Map();let photoGeneration=0;
+const authHeaders=()=>({'apikey':SUPABASE_KEY,'Authorization':'Bearer '+accessToken});
+const loginPanel=document.getElementById('loginPanel');
+const statusEl=document.getElementById('statusText');
+function status(t){statusEl.textContent=t;}
+async function login(){
+ const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;
+ status('Comprobando acceso...');
+ try{
+  const resp=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+  const j=await resp.json();if(!resp.ok||!j.access_token)throw Error('No se pudo iniciar sesión. Comprueba usuario y contraseña.');
+  accessToken=j.access_token;
+  const check=await fetch(SUPABASE_URL+'/rest/v1/administradores?select=id&limit=1',{headers:authHeaders()});
+  if(!check.ok)throw Error('No se pudo comprobar el permiso de administración ('+check.status+').');
+  const admins=await check.json();if(!admins.length)throw Error('Esta cuenta no tiene permiso de administrador.');
+  status('Cargando catálogo...');await loadCatalog();
+  document.getElementById('password').value='';loginPanel.hidden=true;
+  document.getElementById('catalogScroll').hidden=false;
+  document.querySelector('.filters').style.display='flex';
+ }catch(e){accessToken='';status('ERROR: '+e.message);}
+}
+async function loadCatalog(){
+ let rows=[];
+ for(let offset=0;offset<10000;offset+=500){
+  const res=await fetch(SUPABASE_URL+'/rest/v1/catalogo_administracion?select=odoo_id,datos&order=odoo_id.desc&limit=500&offset='+offset,{headers:authHeaders()});
+  if(!res.ok)throw Error('No se puede leer el catálogo ('+res.status+'). Comprueba las políticas RLS.');
+  const page=await res.json();rows.push(...page);if(page.length<500)break;
+ }
+ if(!rows.length)throw Error('El catálogo está vacío o no es accesible para este administrador.');
+ DATA=rows.map(row=>{
+  const d=row.datos||{},h=d.historico||{},id=Number(row.odoo_id),bm=h.compras_mensuales||d.compras_mensuales||{},vm=h.salidas_mensuales||d.salidas_mensuales||{};
+  const received=h.compras_recibidas??d.compras_recibidas;
+  const sales=h.salidas_totales??h.total_salidas??d.salidas_totales;
+  const totalSales=sales==null?Object.values(vm).reduce((a,b)=>a+(Number(b)||0),0):Number(sales);
+  const photo=(d.foto_local||h.foto_local||'').split(/[\\/]/).pop();
+  return {id,t:d.template_id||h.template_id||id,r:d.ref||h.referencia||'',n:d.model||h.modelo||d.ref||'',c:d.categoria||h.categoria||'',p:!!d.publicado,s:Number(d.stock??h.stock??0),f:photo||id+'.jpg',b:received==null?Object.values(bm).reduce((a,b)=>a+(Number(b)||0),0):Number(received),v:totalSales,bm,vm,fv:h.primera_venta||d.primera_venta||'',pr:Array.isArray(h.proveedores)?h.proveedores:(Array.isArray(d.proveedores)?d.proveedores:[])};
+ });
+ buildFilters();update();status('');
+}
+async function signPhoto(name){
+ if(photoCache.has(name))return photoCache.get(name);
+ const res=await fetch(SUPABASE_URL+'/storage/v1/object/sign/'+BUCKET+'/'+encodeURIComponent(name),{method:'POST',headers:{...authHeaders(),'Content-Type':'application/json'},body:JSON.stringify({expiresIn:3600})});
+ if(!res.ok)return null;
+ const obj=await res.json();if(!obj.signedURL)return null;
+ const path=obj.signedURL.startsWith('http')?obj.signedURL:SUPABASE_URL+'/storage/v1'+(obj.signedURL.startsWith('/')?'':'/')+obj.signedURL;
+ photoCache.set(name,path);return path;
+}
+async function loadVisiblePhotos(){
+ const generation=++photoGeneration;
+ const imgs=[...document.querySelectorAll('img[data-private-photo]')];
+ let cursor=0;
+ async function worker(){while(cursor<imgs.length){if(generation!==photoGeneration)return;const img=imgs[cursor++];const name=img.dataset.privatePhoto;try{const url=await signPhoto(name);if(generation!==photoGeneration)return;if(url){img.src=url;img.style.visibility='visible';}}catch(e){}}}
+ await Promise.all(Array.from({length:8},worker));
+}
+document.getElementById('loginButton').onclick=login;
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+const $=x=>document.getElementById(x);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const fmt=n=>Number(n).toLocaleString('es-ES',{maximumFractionDigits:1});let page=0,filtered=[];const pageSize=35;
+function buildFilters(){const cats=[...new Set(DATA.map(x=>x.c))].sort(),sups=[...new Set(DATA.flatMap(x=>x.pr))].sort(),years=[...new Set(DATA.flatMap(x=>Object.keys(x.bm).map(k=>k.slice(0,4))))].sort().reverse();for(const [id,vals] of [['cat',cats],['sup',sups],['year',years],['month',Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'))]]){const el=$(id);el.replaceChildren(new Option(el.options[0].textContent,''));for(const v of vals){let opt=document.createElement('option');opt.value=v;opt.textContent=v;el.append(opt)}}}
+function graph(x){const obj=x.vm||{},ks=Object.keys(obj).sort();if(!ks.length)return '<div class="none">Sin entregas registradas</div>';const ym=s=>+s.slice(0,4)*12 + +s.slice(5,7)-1,form=n=>Math.floor(n/12)+'-'+String(n%12+1).padStart(2,'0');const vals=[];for(let i=ym(ks[0]);i<=ym(ks[ks.length-1]);i++){let k=form(i);vals.push([k,+obj[k]||0])}const max=Math.max(1,...vals.map(x=>x[1]));return '<div class="chart">'+vals.map(([m,v])=>`<div class="cell" title="${m}: ${fmt(v)} entregadas"><div class="val">${v?fmt(v):''}</div><div class="bar" style="height:${v?Math.max(3,Math.round(v/max*32)):0}px"></div><div class="mon">${m.slice(2,4)}/${m.slice(5)}</div></div>`).join('')+'</div>'}
+function update(){const q=$('q').value.trim().toLowerCase(),cat=$('cat').value,sup=$('sup').value,year=$('year').value,month=$('month').value,pub=$('pub').value;const rows=DATA.filter(x=>(!q||(x.n+' '+x.r).toLowerCase().includes(q))&&(!cat||x.c===cat)&&(!sup||x.pr.includes(sup))&&(!year&&!month||Object.keys(x.bm).some(k=>(!year||k.startsWith(year))&&(!month||k.endsWith('-'+month))))&&(!pub||String(+x.p)===pub));const map=new Map();for(const x of rows){if(!map.has(x.t))map.set(x.t,[]);map.get(x.t).push(x)}filtered=[...map.values()];page=0;render()}
+function render(){let html='';for(const vs of filtered.slice(page*pageSize,(page+1)*pageSize)){const x=vs[0];html+=`<section class="model"><div class="modelhead"><strong>${esc(x.n)}</strong><span>${vs.length} variantes</span></div><div class="variants">`;for(const v of vs){html+=`<div class="variant"><div class="photo"><img loading="lazy" data-private-photo="${esc(v.f)}" alt="" onerror="this.style.visibility='hidden'"></div><div class="ref">${esc(v.r)} ${v.p?'●':'○'}</div><div class="metrics"><span>Stock <b>${fmt(v.s)}</b></span><span>Compras <b>${v.b?fmt(v.b):'—'}</b></span><span>Ventas <b>${v.v==null?'—':fmt(v.v)}</b></span></div><div class="charttitle">Entregas por mes</div>${graph(v)}<div class="first">1.ª entrega: ${esc(v.fv||'—')}</div></div>`}html+='</div></section>'} $('list').innerHTML=html||'<p>No se encontraron modelos.</p>';$('count').textContent=`${filtered.length.toLocaleString('es-ES')} modelos · ${filtered.reduce((a,v)=>a+v.length,0).toLocaleString('es-ES')} variantes`;let total=Math.max(1,Math.ceil(filtered.length/pageSize));$('page').textContent=`Página ${page+1} de ${total}`;$('prev').disabled=page===0;$('next').disabled=page+1>=total;loadVisiblePhotos()}
+for(const id of ['q','cat','sup','year','month','pub'])$(id).addEventListener(id==='q'?'input':'change',update);$('prev').onclick=()=>{page--;render();document.getElementById('catalogScroll').scrollTop=0};$('next').onclick=()=>{page++;render();document.getElementById('catalogScroll').scrollTop=0};
+</script></body></html>
