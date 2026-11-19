@@ -6,12 +6,56 @@ function isSparePart(product) {
   return /\b(?:repuestos?|recambios?)\b/i.test(name + ' ' + category) || /^(?:VD|VI|FR)/i.test(reference);
 }
 
+function catalogModelTitle(name) {
+  return String(name || '').replace(/^\[[^\]]+\]\s*/, '').replace(/\s+\(C\d+\)$/, '');
+}
+
 (() => {
   const style = document.createElement('style');
   style.textContent = `
+    :root{--admin-scale:1}
+    body{font:calc(14px * var(--admin-scale))/1.45 Arial,sans-serif;background:#f2f6f7;color:#23353c}
+    .top-panel{box-shadow:0 3px 18px #16393e0b}
+    .top-panel header{gap:22px;padding:calc(17px * var(--admin-scale)) max(20px,calc((100vw - 2160px)/2))}
+    header img{width:calc(120px * var(--admin-scale));max-height:calc(58px * var(--admin-scale))}
+    header h1{font-size:calc(23px * var(--admin-scale));letter-spacing:-.5px;line-height:1.25}
+    header small{display:block;margin-top:5px;font-size:calc(12px * var(--admin-scale));line-height:1.4}
+    .top-panel .filters{gap:9px;padding:12px max(20px,calc((100vw - 2160px)/2));border-top:1px solid #edf1f2;background:#f8fafb}
+    .filters input,.filters select{min-width:140px;padding:calc(10px * var(--admin-scale));font:calc(13px * var(--admin-scale)) Arial;border-radius:8px;border-color:#d9e3e6}
+    main#catalogScroll{padding:20px max(20px,calc((100vw - 2160px)/2)) 30px}
+    .info{font-size:calc(12px * var(--admin-scale));line-height:1.55;background:#fff;border-color:#e0e8ea;padding:12px 15px;border-radius:9px;color:#60747c;margin-bottom:16px}
+    .catalog-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+    .count{margin:0;font-size:calc(13px * var(--admin-scale));font-weight:600;color:#5b737b}
+    .view-size{display:flex;gap:7px;align-items:center;padding:6px 8px;background:#fff;border:1px solid #dce6e9;border-radius:10px;font-size:calc(12px * var(--admin-scale))}
+    .view-size label{padding:0 6px;font-weight:600}.view-size output{min-width:48px;text-align:center;font-variant-numeric:tabular-nums}
+    .view-size button{padding:6px 10px;min-height:32px;border:1px solid #dce6e9;border-radius:6px;background:#f4f9f9;color:#176c74;font:inherit;cursor:pointer}
+    .view-size button:disabled{opacity:.35;cursor:default}.view-size button:focus-visible{outline:3px solid #148e99;outline-offset:2px}
+    #list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,calc(530px * var(--admin-scale))),1fr));gap:20px;align-items:start}
+    #list>.model{margin:0;border:1px solid #dce7e9;border-top:3px solid #269aa4;border-radius:12px;box-shadow:0 3px 12px #12343b05;overflow:hidden;background:#fff}
+    #list>.model:nth-child(even){border-top-color:#66858b}
+    .modelhead,.model:nth-child(even) .modelhead{padding:14px 16px;gap:10px;background:#f7fafb;align-items:start;border-bottom:1px solid #e7eef0}
+    .modelhead strong{font-size:calc(15px * var(--admin-scale));line-height:1.4;font-weight:700;overflow-wrap:anywhere}
+    .modelhead span{font-size:calc(11px * var(--admin-scale));white-space:nowrap;color:#698089;padding-top:3px}
+    .variants{padding:12px;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,calc(165px * var(--admin-scale))),1fr))}
+    .variant{padding:10px;border-radius:9px;border-color:#e2eaed}
+    .photo{height:calc(125px * var(--admin-scale))}.photo img{height:calc(120px * var(--admin-scale))}
+    .ref{font-size:calc(12px * var(--admin-scale));margin:10px 0 9px;overflow-wrap:anywhere}
+    .metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));font-size:calc(10px * var(--admin-scale));gap:4px;padding:8px 0;border-top:1px solid #edf2f3;border-bottom:1px solid #edf2f3}.metrics span{display:flex;flex-direction:column;gap:2px;color:#6c8189}.metrics b{font-size:calc(17px * var(--admin-scale));line-height:1.3}
+    .charttitle{font-size:calc(11px * var(--admin-scale));margin-top:12px}.chart{height:calc(78px * var(--admin-scale));gap:4px;margin-top:5px}
+    .cell{max-width:calc(27px * var(--admin-scale));min-width:12px}.bar{max-width:calc(18px * var(--admin-scale))}
+    .val{font-size:calc(10px * var(--admin-scale));line-height:1.3}.mon{font-size:calc(9px * var(--admin-scale));line-height:1.4}
+    .first,.none{font-size:calc(10px * var(--admin-scale));line-height:1.5}.first{margin-top:6px}
+    .pager{font-size:calc(13px * var(--admin-scale));margin:26px 0}.pager button{font:inherit;padding:10px 16px;border-radius:8px}
+    @media(max-width:650px){
+      .top-panel header{padding:12px;gap:12px}header img{width:75px;max-height:48px}header h1{font-size:calc(17px * var(--admin-scale));letter-spacing:-.2px}header small{font-size:calc(10px * var(--admin-scale))}
+      .top-panel .filters{gap:6px;padding:9px 12px}.filters input,.filters select{min-width:130px;padding:8px;font-size:calc(11px * var(--admin-scale))}
+      main#catalogScroll{padding:12px}.info{padding:10px;font-size:calc(10px * var(--admin-scale))}.catalog-toolbar{gap:10px;margin-bottom:12px}.view-size{margin-left:auto}
+      #list{gap:14px}.modelhead{padding:12px}.modelhead strong{font-size:calc(13px * var(--admin-scale))}.variants{padding:8px;gap:7px;grid-template-columns:repeat(auto-fit,minmax(min(100%,calc(140px * var(--admin-scale))),1fr))}
+      .variant{padding:7px}.photo{height:calc(95px * var(--admin-scale))}.photo img{height:calc(90px * var(--admin-scale))}
+    }
     .photo-open{position:relative;width:100%;padding:0;border:0;background:#fff;cursor:zoom-in;border-radius:5px}
     .photo-open:focus-visible{outline:3px solid #148e99;outline-offset:2px}
-    .photo-open span{position:absolute;right:2px;bottom:0;background:#edf6f7;color:#176c74;padding:2px 5px;border-radius:4px;font-size:10px}
+    .photo-open span{position:absolute;right:2px;bottom:0;background:#edf6f7;color:#176c74;padding:2px 5px;border-radius:4px;font-size:calc(10px * var(--admin-scale))}
     #photoZoom{width:min(1050px,96vw);max-width:96vw;max-height:94dvh;padding:0;border:1px solid #cbdcde;border-radius:12px;color:#23353c;background:#fff}
     #photoZoom::backdrop{background:rgba(11,25,30,.78)}
     .zoom-header,.zoom-tools{display:flex;align-items:center;gap:10px;padding:12px 16px}
@@ -27,6 +71,36 @@ function isSparePart(product) {
     @media(max-width:650px){.zoom-header{padding:10px}.zoom-header h2{font-size:14px}.zoom-stage{height:58dvh}.zoom-tools{gap:6px;padding:8px}}
   `;
   document.head.append(style);
+  const count = document.getElementById('count');
+  if (count) {
+    const toolbar = document.createElement('div');
+    toolbar.className = 'catalog-toolbar';
+    count.before(toolbar);
+    toolbar.append(count);
+    const sizeControl = document.createElement('div');
+    sizeControl.className = 'view-size';
+    sizeControl.setAttribute('role', 'group');
+    sizeControl.setAttribute('aria-label', 'Tamaño de toda la vista');
+    sizeControl.innerHTML = '<label>Tamaño de vista</label><button type="button" id="viewSmaller" aria-label="Reducir tamaño de toda la página">−</button><output id="viewPercent" aria-live="polite">100 %</output><button type="button" id="viewLarger" aria-label="Aumentar tamaño de toda la página">+</button><button type="button" id="viewReset">Restablecer</button>';
+    toolbar.append(sizeControl);
+    let viewSize = 100;
+    try {
+      const stored = Number(localStorage.getItem('novaquia.admin.viewSize'));
+      if (stored >= 80 && stored <= 150 && stored % 10 === 0) viewSize = stored;
+    } catch (_) {}
+    function applySize(value) {
+      viewSize = Math.max(80, Math.min(150, value));
+      document.documentElement.style.setProperty('--admin-scale', viewSize / 100);
+      sizeControl.querySelector('#viewPercent').textContent = viewSize + ' %';
+      sizeControl.querySelector('#viewSmaller').disabled = viewSize <= 80;
+      sizeControl.querySelector('#viewLarger').disabled = viewSize >= 150;
+      try { localStorage.setItem('novaquia.admin.viewSize', String(viewSize)); } catch (_) {}
+    }
+    sizeControl.querySelector('#viewSmaller').onclick = () => applySize(viewSize - 10);
+    sizeControl.querySelector('#viewLarger').onclick = () => applySize(viewSize + 10);
+    sizeControl.querySelector('#viewReset').onclick = () => applySize(100);
+    applySize(viewSize);
+  }
   const dialog = document.createElement('dialog');
   dialog.id = 'photoZoom';
   dialog.setAttribute('aria-labelledby', 'zoomTitle');
