@@ -10,6 +10,32 @@ function catalogModelTitle(name) {
   return String(name || '').replace(/^\[[^\]]+\]\s*/, '').replace(/\s+\(C\d+\)$/, '');
 }
 
+function adminCatalogRecord(row) {
+  const d=row.datos||{},h=d.historico||{},id=Number(row.odoo_id);
+  const bm=h.compras_mensuales||d.compras_mensuales||{},vm=h.salidas_mensuales||d.salidas_mensuales||{};
+  const complete=h.completo===true;
+  const received=h.compras_recibidas??d.compras_recibidas;
+  const delivered=h.ventas_entregadas??h.salidas_totales??d.ventas_entregadas;
+  const providers=h.proveedores||d.proveedores||{};
+  const photo=d.foto_estado==='sin_foto_odoo'?null:(d.foto_local||h.foto_local||'').split(/[\\/]/).pop()||null;
+  return {id,t:d.template_id||id,r:d.ref||h.referencia||('Sin referencia · #'+id),n:d.model||h.modelo||('Producto #'+id),c:d.categoria||h.categoria||'',p:!!d.publicado,s:Number(d.stock??0),f:photo?('FOTOS/'+photo):null,b:received==null?(complete?0:null):Number(received),v:delivered==null?(complete?Object.values(vm).reduce((sum,q)=>sum+Number(q||0),0):null):Number(delivered),bm,vm,fv:h.primera_venta||d.primera_venta||'',pr:Array.isArray(providers)?providers:Object.keys(providers),synced:d.sincronizado_en||''};
+}
+
+function catalogPhotoHtml(v, privatePhoto) {
+  if (!v.f) return '<div class="photo photo-empty" role="img" aria-label="Sin foto en Odoo"><span>Sin foto en Odoo</span></div>';
+  const name=v.f.split(/[\\/]/).pop();
+  const source=privatePhoto?'data-private-photo="'+esc(name)+'"':'src="CATALOGO_ODOO/'+esc(encodeURI(v.f))+'"';
+  return '<button type="button" class="photo photo-open" data-zoom-id="'+v.id+'" aria-label="Ampliar fotografía de '+esc(v.r)+'"><img loading="lazy" '+source+' alt="'+esc(v.r)+'" onerror="this.style.visibility=\'hidden\'"><span>Ampliar</span></button>';
+}
+
+function showCatalogSync(rows) {
+  const latest=rows.map(row=>row.datos?.sincronizado_en||row.synced||'').filter(Boolean).sort().pop();
+  let label=document.getElementById('catalogSync');
+  if (!latest) return;
+  if (!label) { label=document.createElement('p');label.id='catalogSync';label.className='catalog-sync';document.querySelector('.info')?.after(label); }
+  label.textContent='Actualizado desde Odoo: '+new Date(latest).toLocaleString('es-ES',{timeZone:'Europe/Madrid'});
+}
+
 (() => {
   const style = document.createElement('style');
   style.textContent = `
@@ -54,6 +80,7 @@ function catalogModelTitle(name) {
       .variant{padding:7px}.photo{height:calc(95px * var(--admin-scale))}.photo img{height:calc(90px * var(--admin-scale))}
     }
     .photo-open{position:relative;width:100%;padding:0;border:0;background:#fff;cursor:zoom-in;border-radius:5px}
+    .photo-empty{background:#f5f8f9;border-radius:6px;color:#6e838b;font-size:calc(12px * var(--admin-scale));text-align:center;padding:12px}.catalog-sync{font-size:calc(11px * var(--admin-scale));color:#657e87;margin:-5px 0 14px}
     .photo-open:focus-visible{outline:3px solid #148e99;outline-offset:2px}
     .photo-open span{position:absolute;right:2px;bottom:0;background:#edf6f7;color:#176c74;padding:2px 5px;border-radius:4px;font-size:calc(10px * var(--admin-scale))}
     #photoZoom{width:min(1050px,96vw);max-width:96vw;max-height:94dvh;padding:0;border:1px solid #cbdcde;border-radius:12px;color:#23353c;background:#fff}
@@ -152,7 +179,7 @@ function catalogModelTitle(name) {
       const thumbnail = button.querySelector('img');
       // Reuse the authenticated signed URL; never change bucket visibility.
       const url = thumbnail.currentSrc || thumbnail.getAttribute('src') ||
-        (typeof signPhoto === 'function' ? await signPhoto(product.f) : '');
+        (typeof signPhoto === 'function' ? await signPhoto(product.f.split(/[\\/]/).pop()) : '');
       if (!dialog.open || generation !== current) return;
       if (!url) throw new Error('No photo');
       image.src = url;
