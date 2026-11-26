@@ -37,9 +37,9 @@ function modelSalesPresentation(variants,criteria={}) {
   const top=modelTopSale(variants,criteria.year||'',criteria.months||[]);
   const superSale=modelTopSale(variants,criteria.year||'',criteria.months||[],35,true);
   const stuck=modelStuckStock(variants);
-  if(stuck&&(criteria.mode==='stuck'||!top))return {className:'stuck-stock',badgeClass:'stuck-stock-badge',label:'ATASCADAS',reason:stuckStockCaption(stuck),secondary:superSale?'Más de 35 en el periodo':top?'Top ventas en el periodo':''};
-  if(superSale)return {className:'super-sales',badgeClass:'super-sales-badge',label:'MÁS DE 35 / MES',reason:topSaleCaption(superSale)+(stuck?' · '+stuckStockCaption(stuck):''),secondary:stuck?'Atascadas':''};
-  if(top)return {className:'top-sales',badgeClass:'',label:'TOP VENTAS',reason:topSaleCaption(top)+(stuck?' · '+stuckStockCaption(stuck):''),secondary:stuck?'Atascadas':''};
+  if(stuck&&(criteria.mode==='stuck'||!top))return {className:'stuck-stock',badgeClass:'stuck-stock-badge',label:'ATASCADAS',reason:stuckStockCaption(stuck),secondary:superSale?'Top ventas en el periodo':top?'Grandes ventas en el periodo':''};
+  if(superSale)return {className:'super-sales',badgeClass:'super-sales-badge',label:'TOP VENTAS',reason:topSaleCaption(superSale)+(stuck?' · '+stuckStockCaption(stuck):''),secondary:stuck?'Atascadas':''};
+  if(top)return {className:'top-sales',badgeClass:'',label:'GRANDES VENTAS',reason:topSaleCaption(top)+(stuck?' · '+stuckStockCaption(stuck):''),secondary:stuck?'Atascadas':''};
   return {className:'',badgeClass:'',label:'',reason:'',secondary:''};
 }
 function filterCatalogueModels(data, criteria={}) {
@@ -105,20 +105,20 @@ function catalogueCriteria() {
   const names=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   details.innerHTML='<summary aria-label="Seleccionar varios meses">Todos los meses</summary><div class="month-panel"><div class="month-options" role="group" aria-label="Meses del periodo">'+names.map((name,i)=>`<label><input type="checkbox" value="${String(i+1).padStart(2,'0')}" aria-label="${name}">${name}</label>`).join('')+'</div><div class="month-actions"><button type="button" data-month-action="all">Todos los meses</button><button type="button" data-month-action="clear">Limpiar selección</button><button type="button" data-month-action="done">Aplicar</button></div></div>';
   native.before(details);
-  details.querySelector('summary').title='Puedes elegir varios meses. Con Top ventas se filtran ventas; sin Top ventas se mantiene el filtro de compras.';
+  details.querySelector('summary').title='Puedes elegir varios meses. Con Top ventas o Grandes ventas se filtran ventas; sin estos filtros se mantiene el filtro de compras.';
   function changed(){const months=selectedCatalogueMonths();details.querySelector('summary').textContent=!months.length||months.length===12?'Todos los meses':months.length<=2?months.map(m=>names[Number(m)-1]).join(', '):months.length+' meses seleccionados';if(typeof update==='function')update();}
   details.addEventListener('change',changed);
   details.addEventListener('click',e=>{const action=e.target.closest('[data-month-action]')?.dataset.monthAction;if(!action)return;if(action==='done'){details.open=false;return;}details.querySelectorAll('input').forEach(input=>input.checked=action==='all');changed();});
   document.addEventListener('click',e=>{if(!details.contains(e.target))details.open=false;});
   details.addEventListener('keydown',e=>{if(e.key==='Escape'){details.open=false;details.querySelector('summary').focus();}});
   const toolbar=document.querySelector('.catalog-toolbar');
-  const button=document.createElement('button');button.id='topSalesToggle';button.type='button';button.textContent='Top ventas';button.setAttribute('aria-pressed','false');button.title='Algún color con al menos 20 vendidos en un solo mes del periodo seleccionado. Se muestra el modelo completo.';
-  const help=document.createElement('p');help.className='top-sales-help';help.textContent='Top ventas: un color con 20 o más vendidos en un mes. Respeta el año y los meses seleccionados; sin periodo, revisa todo el histórico.';
+  const button=document.createElement('button');button.id='topSalesToggle';button.type='button';button.textContent='Grandes ventas';button.setAttribute('aria-pressed','false');button.title='Algún color con al menos 20 vendidos en un solo mes del periodo seleccionado. Se muestra el modelo completo.';
+  const help=document.createElement('p');help.className='top-sales-help';help.textContent='Grandes ventas: un color con 20 o más vendidos en un mes. Respeta el año y los meses seleccionados; sin periodo, revisa todo el histórico.';
   const buttons=document.createElement('div');buttons.className='sales-filter-buttons';buttons.append(button);
-  const superButton=document.createElement('button');superButton.id='superSalesToggle';superButton.type='button';superButton.textContent='Más de 35 / mes';superButton.setAttribute('aria-pressed','false');superButton.title='Algún color vendido más de 35 unidades en un solo mes del periodo elegido. Modelo completo.';buttons.append(superButton);
+  const superButton=document.createElement('button');superButton.id='superSalesToggle';superButton.type='button';superButton.textContent='Top ventas';superButton.setAttribute('aria-pressed','false');superButton.title='Algún color vendido más de 35 unidades en un solo mes del periodo elegido. Modelo completo.';buttons.prepend(superButton);
   const stuckButton=document.createElement('button');stuckButton.id='stuckStockToggle';stuckButton.type='button';stuckButton.textContent='Atascadas';stuckButton.setAttribute('aria-pressed','false');stuckButton.title='Modelo con al menos 6 meses desde primera venta (o recepción si nunca se vendió), al menos 20 unidades en stock y existencias para más de 12 meses al ritmo de los últimos 6 meses completos. Según última sincronización.';buttons.append(stuckButton);
   if(toolbar){toolbar.insertBefore(buttons,toolbar.querySelector('.view-size'));toolbar.append(help);}
-  const defaultHelp='Top ventas: ≥20 de un color en un mes. Malva: más de 35. Ambos respetan el año y los meses seleccionados. Amarillo: existencias con salida lenta según última sincronización.';
+  const defaultHelp='Top ventas (malva): más de 35 de un color en un mes. Grandes ventas (rojo): ≥20. Ambos respetan el año y los meses seleccionados. Amarillo: existencias con salida lenta según última sincronización.';
   help.textContent=defaultHelp;
   function setMode(mode){catalogueSalesMode=catalogueSalesMode===mode?'':mode;topSalesEnabled=catalogueSalesMode==='top';button.setAttribute('aria-pressed',String(topSalesEnabled));superButton.setAttribute('aria-pressed',String(catalogueSalesMode==='super'));stuckButton.setAttribute('aria-pressed',String(catalogueSalesMode==='stuck'));help.textContent=catalogueSalesMode==='stuck'?'Atascadas: ≥6 meses de antigüedad, ≥20 unidades en stock y cobertura >12 meses con las ventas de los últimos 6 meses completos. Usa la última sincronización, independientemente del año o meses elegidos.':defaultHelp;if(typeof update==='function')update();}
   button.onclick=()=>setMode('top');superButton.onclick=()=>setMode('super');stuckButton.onclick=()=>setMode('stuck');
