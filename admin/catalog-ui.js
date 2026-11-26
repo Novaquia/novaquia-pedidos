@@ -18,7 +18,7 @@ function adminCatalogRecord(row) {
   const delivered=h.ventas_entregadas??h.salidas_totales??d.ventas_entregadas;
   const providers=h.proveedores||d.proveedores||{};
   const photo=d.foto_estado==='sin_foto_odoo'?null:(d.foto_local||h.foto_local||'').split(/[\\/]/).pop()||null;
-  return {id,t:d.template_id||id,r:d.ref||h.referencia||('Sin referencia · #'+id),n:d.model||h.modelo||('Producto #'+id),c:d.categoria||h.categoria||'',p:!!d.publicado,s:Number(d.stock??0),f:photo?('FOTOS/'+photo):null,b:received==null?(complete?0:null):Number(received),v:delivered==null?(complete?Object.values(vm).reduce((sum,q)=>sum+Number(q||0),0):null):Number(delivered),bm,vm,fv:h.primera_venta||d.primera_venta||'',pr:Array.isArray(providers)?providers:Object.keys(providers),synced:d.sincronizado_en||''};
+  return {id,g:Array.isArray(d.publicos)?d.publicos:[],t:d.template_id||id,r:d.ref||h.referencia||('Sin referencia · #'+id),n:d.model||h.modelo||('Producto #'+id),c:d.categoria||h.categoria||'',p:!!d.publicado,s:Number(d.stock??0),f:photo?('FOTOS/'+photo):null,b:received==null?(complete?0:null):Number(received),v:delivered==null?(complete?Object.values(vm).reduce((sum,q)=>sum+Number(q||0),0):null):Number(delivered),bm,vm,fv:h.primera_venta||d.primera_venta||'',pr:Array.isArray(providers)?providers:Object.keys(providers),synced:d.sincronizado_en||''};
 }
 
 function catalogPhotoHtml(v, privatePhoto) {

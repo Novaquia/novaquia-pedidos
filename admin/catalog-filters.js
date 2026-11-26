@@ -43,11 +43,12 @@ function modelSalesPresentation(variants,criteria={}) {
   return {className:'',badgeClass:'',label:'',reason:'',secondary:''};
 }
 function filterCatalogueModels(data, criteria={}) {
-  const {q='',category='',supplier='',year='',months=[],published='',top=false,mode=''}=criteria;
+  const {q='',category='',supplier='',year='',months=[],published='',audience='',top=false,mode=''}=criteria;
   const groups=new Map();
   for (const variant of data) { const key=variant.t??variant.id; if(!groups.has(key))groups.set(key,[]);groups.get(key).push(variant); }
   return [...groups.values()].filter(variants=>{
     if(!variants.some(x=>(!q||(x.n+' '+x.r).toLowerCase().includes(q.toLowerCase()))&&(!category||x.c===category)&&(!supplier||(x.pr||[]).includes(supplier))&&(!published||String(+x.p)===published)))return false;
+    if(audience&&!variants.some(x=>audience==='__none__'?!(x.g||[]).length:(x.g||[]).includes(audience)))return false;
     if(mode==='stuck')return !!modelStuckStock(variants);
     if(mode==='super')return !!modelTopSale(variants,year,months,35,true);
     if(top||mode==='top')return !!modelTopSale(variants,year,months);
@@ -63,9 +64,12 @@ let topSalesEnabled=false;
 let catalogueSalesMode='';
 function selectedCatalogueMonths() { const months=[...document.querySelectorAll('.month-options input:checked')].map(input=>input.value);return months.length===12?[]:months; }
 function catalogueCriteria() {
-  return {q:document.getElementById('q').value.trim(),category:document.getElementById('cat').value,supplier:document.getElementById('sup').value,year:document.getElementById('year').value,months:selectedCatalogueMonths(),published:document.getElementById('pub').value,top:topSalesEnabled,mode:catalogueSalesMode};
+  return {q:document.getElementById('q').value.trim(),category:document.getElementById('cat').value,supplier:document.getElementById('sup').value,year:document.getElementById('year').value,months:selectedCatalogueMonths(),published:document.getElementById('pub').value,audience:document.getElementById('audience')?.value||'',top:topSalesEnabled,mode:catalogueSalesMode};
 }
 (() => {
+  const audience=document.createElement('select');audience.id='audience';audience.setAttribute('aria-label','Público');audience.title='Público indicado en Odoo. Sin clasificar: el modelo no tiene ese atributo.';
+  for(const [value,label] of [['','Todo el público'],['Hombre','Hombre'],['Mujer','Mujer'],['Unisex','Unisex'],['Cadete','Cadete'],['Niño','Niño'],['__none__','Sin clasificar']])audience.append(new Option(label,value));
+  document.getElementById('cat').after(audience);audience.addEventListener('change',()=>{if(typeof update==='function')update();});
   const style=document.createElement('style');
   style.textContent=`
     #list>.model.super-sales,#list>.model.super-sales:nth-child(even){border-color:#cfb6de;border-top:4px solid #9960b3;box-shadow:0 3px 12px #86549a14}
